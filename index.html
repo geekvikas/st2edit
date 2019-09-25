@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>StackStorm Language Editor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.3.1/handlebars.min.js"></script>
+</head>
+
+<body onload="processScript()">
+
+
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <h2>StackStorm Language Editor</h2>
+                <p>The missing feature of StackStorm</p>
+            </div>
+        </div>
+    </nav>  
+    <div class="container-fluid">
+      
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label class="h4" for="params">Parameters</label>&nbsp;&nbsp;
+                    <label id="paramStatus" style="visibility: hidden"></label>
+                    <textarea class="form-control" id="params" rows="4" >
+{
+    "_" : {
+        "infrastructure_environment_name" : "Sample_Environment_Name"
+    }
+}
+                    </textarea>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label class="h4" for="script">Script</label>
+                    <textarea class="form-control" id="script" rows="14" onkeyup="processScript()">kubectl --context {{ _.infrastructure_environment_name }} version</textarea>
+                </div>
+            </div>
+            <div class="col-xs-12">
+                <div class="form-group">
+                        <label class="h4" for="output">Output</label>
+                        <textarea class="form-control" id="output" rows="4"></textarea>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <script>
+        let jsonString = '';
+        let json = {};
+        let script = '';   
+
+        let validateJson = function(){
+            let paramStatus = document.getElementById("paramStatus");
+            paramStatus.style.visibility="visible";
+            paramStatus.innerText = "";
+
+            try{
+                jsonString = document.getElementById("params").value;
+                json = JSON.parse(jsonString);
+                paramStatus.className="bg-success";
+                paramStatus.innerText = "Valid JSON";
+                return true;
+            }
+            catch(err){
+                paramStatus.className="bg-danger";
+                paramStatus.innerText = err;
+                return false;
+            }
+        }
+        
+        let processScript = function(){
+            if(!validateJson())
+                return false;
+            
+            script = document.getElementById("script").value;
+            
+            let template = Handlebars.compile(script);
+            document.getElementById("output").value = template(json);
+        }
+
+    </script>
+</body>
+
+</html>
